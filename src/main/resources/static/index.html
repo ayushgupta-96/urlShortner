@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>URL Shortener</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            width: 400px;
+            color: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #ff7a18;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #ff512f;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+
+        a {
+            color: #00ffcc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+            background: #00c9ff;
+        }
+
+        .copy-btn:hover {
+            background: #0096c7;
+        }
+
+        #error {
+            margin-top: 10px;
+            color: #ff4d4d;
+        }
+
+        .success {
+            margin-top: 10px;
+            color: #00ffcc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🔗 URL Shortener</h2>
+
+    <input type="text" id="urlInput" placeholder="Enter your URL (https://...)">
+
+    <button onclick="shorten()">Shorten URL</button>
+
+    <div id="result"></div>
+    <div id="error"></div>
+    <div id="success"></div>
+</div>
+
+<script>
+    function shorten() {
+        const url = document.getElementById("urlInput").value;
+
+        document.getElementById("error").innerText = "";
+        document.getElementById("result").innerHTML = "";
+        document.getElementById("success").innerText = "";
+
+        fetch("/api/shorten", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                originalUrl: url,
+                customAlias: "",
+                expiryDays: 7
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.error || data.originalUrl === undefined) {
+                document.getElementById("error").innerText = "Invalid or failed request";
+                return;
+            }
+
+            const shortUrl = data.shortUrl;
+
+            document.getElementById("result").innerHTML = `
+                <p>Short URL:</p>
+                <a href="${shortUrl}" target="_blank">${shortUrl}</a>
+                <br>
+                <button class="copy-btn" onclick="copyUrl('${shortUrl}')">Copy</button>
+            `;
+        })
+        .catch(() => {
+            document.getElementById("error").innerText = "Server error!";
+        });
+    }
+
+    function copyUrl(url) {
+        navigator.clipboard.writeText(url);
+        document.getElementById("success").innerText = "Copied to clipboard!";
+    }
+</script>
+
+</body>
+</html>
