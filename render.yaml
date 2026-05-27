@@ -1,6 +1,4 @@
 services:
   - type: web
     name: url-shortener
-    runtime: java
-    buildCommand: "./mvnw clean install"
-    startCommand: "java -jar target/demo-0.0.1-SNAPSHOT.jar"
+    env: docker
